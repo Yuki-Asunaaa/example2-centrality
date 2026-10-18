@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-CN">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>网络中心性实验室 · 例题二</title><link rel="icon" href="data:,"><link rel="stylesheet" href="style.css"><script defer src="vendor/d3.v7.min.js"></script><script type="module" src="app.js"></script></head>
+<body>
+<a class="skip" href="#workspace">跳转到网络图</a>
+<header class="page-head">
+ <div class="brand"><svg width="36" height="36" viewBox="0 0 36 36" aria-hidden="true"><path d="M8 9L27 12L18 28Z M8 9L18 18L27 12M18 18V28" fill="none" stroke="currentColor" stroke-width="1.5"/><g fill="currentColor"><circle cx="8" cy="9" r="3"/><circle cx="27" cy="12" r="3"/><circle cx="18" cy="28" r="3"/><circle cx="18" cy="18" r="3"/></g></svg><div><h1>网络中心性实验室</h1><p>例题二 · 从连接、桥梁与距离，理解节点的重要性</p></div></div>
+ <div class="head-actions"><button id="download" disabled>下载结果</button><button id="reload" class="primary">重新计算</button></div>
+</header>
+<main>
+ <section class="metric-section" aria-label="选择中心性指标">
+  <div class="metric-tabs" role="group" aria-label="中心性指标">
+   <button data-metric="degree" aria-pressed="true"><strong>度中心性</strong><span>谁的直接连接更多</span></button>
+   <button data-metric="betweenness" aria-pressed="false"><strong>介数中心性</strong><span>谁是最短路径上的桥梁</span></button>
+   <button data-metric="closeness" aria-pressed="false"><strong>接近中心性</strong><span>谁离整个网络更近</span></button>
+  </div>
+  <div class="metric-note"><p id="metric-description">直接连接的邻居越多，度中心性越高。它衡量局部连接，不使用边权。</p><code id="metric-formula">C(v) = degree(v) / (N − 1)</code></div>
+  <div class="scale-settings">
+   <div class="scale-choice" role="group" aria-label="颜色与大小显示映射" aria-describedby="scale-description"><span>颜色与大小</span><button data-scale="linear" aria-pressed="false">线性</button><button data-scale="sqrt" aria-pressed="true">开方</button><button data-scale="rank" aria-pressed="false">排名占比</button></div>
+   <p id="scale-description">开方：增强中低分节点的颜色和大小，便于观察。均按全图最低至最高分映射，不改变分数与排名。</p>
+  </div>
+ </section>
+ <div id="notice" class="notice" role="status" aria-live="polite">正在读取案例数据并计算三种中心性…</div>
+ <section id="workspace" class="workspace" aria-label="网络与节点排名" tabindex="-1">
+  <div class="network-pane">
+   <div class="pane-heading"><h2>关系网络</h2><span id="summary">加载中</span></div>
+   <div class="graph-toolbar"><div class="legend"><span>低</span><span class="color-ramp" aria-hidden="true"></span><span>高</span><small>颜色越深、节点越大，分数越高</small></div><button id="clear" disabled>清除选择</button></div>
+   <div class="graph-wrap" id="graph-wrap"><svg id="network" role="img" aria-label="关系网络。可通过右侧排名选择节点，在下方查看详情。"></svg><div id="graph-message" class="graph-message"><p>正在生成关系网络…</p></div>
+    <div class="graph-controls" aria-label="视图操作"><button id="zoom-in" aria-label="放大网络" disabled>放大</button><button id="zoom-out" aria-label="缩小网络" disabled>缩小</button><button id="fit" disabled>适应视图</button><button id="pause" disabled>暂停布局</button></div>
+   </div>
+   <div class="graph-foot"><span>拖动节点探索 · 滚轮缩放</span><span id="range">指标范围 —</span></div>
+  </div>
+  <aside class="ranking-pane" aria-label="节点排名">
+   <div class="pane-heading"><h2>节点排名</h2><span id="result-count">—</span></div>
+   <div class="filters"><label for="search">查找节点</label><input id="search" type="search" placeholder="输入节点编号或类型" autocomplete="off"><label for="type">节点类型</label><select id="type"><option value="">全部类型</option></select></div>
+   <div class="rank-labels"><span>排名 / 节点</span><span id="rank-metric">度中心性</span></div><ol id="rank-list" class="rank-list" aria-label="按当前中心性降序排列"></ol><p id="rank-empty" class="empty" hidden>没有匹配节点，试试其他编号或类型。</p>
+   <p class="rank-help">筛选只影响显示，分数始终基于完整网络。</p>
+  </aside>
+ </section>
+ <div class="bottom-grid">
+  <section class="detail-pane" aria-labelledby="detail-title"><div class="pane-heading"><h2 id="detail-title">节点档案</h2><span id="detail-type">等待选择</span></div><div id="detail-content"><p class="detail-empty">从网络或排名中选择一个节点，<br>比较它的三种中心性，查看直接相连的对象。</p></div></section>
+  <section class="reading-pane" aria-labelledby="why-title"><h2 id="why-title">三个指标，三个观察角度</h2><dl class="concepts"><div><dt>连接多</dt><dd>度中心性关注直接邻居，是节点的局部连接能力。</dd></div><div><dt>常被经过</dt><dd>介数中心性统计其他节点之间的最短路径，有多大比例经过这里。</dd></div><div><dt>总体距离短</dt><dd>接近中心性是平均最短距离的倒数，关注全局可达性。</dd></div></dl><p class="reading-note">三种分数的尺度不同，不能直接相加或互相比大小。颜色与半径在每个指标内独立映射；接近中心性可大于 1。</p></section>
+ </div>
+ <details class="method"><summary>数据与计算约定 <span>查看边权、清洗记录和算法说明</span></summary><div class="method-content"><div><h3>先说明“距离”</h3><p>题目没有明确边权的物理含义。本项目把边权视为关系强度，采用 <code>距离 = 1 / 强度</code>：关系越强，路径成本越小。这是本次建模约定，不是题目唯一答案。</p><h3>保留关系，统一计算图</h3><p id="cleaning">正在读取清洗记录。</p><p>同一对节点有多种关系时，计算采用最强关系；节点详情保留关系类型。<code>r_certchain</code> 统一为 <code>r_cert_chain</code>。</p></div><div><h3>算法实现</h3><p>介数中心性由手写 Dijkstra + Brandes 算法计算，统计所有等长最短路径，不计路径端点并归一化。内部使用统一放大的整数距离，保证等长比较准确。</p><p>度中心性与接近中心性使用 NetworkX；接近中心性采用可达比例修正。图的坐标由 D3 力导向布局生成，屏幕距离不代表算法距离。</p><table><caption>关系类型与强度</caption><thead><tr><th>关系类型</th><th>强度</th></tr></thead><tbody id="weights"></tbody></table></div></div></details>
+</main><footer>图与核心 · 案例二 <span id="runtime">Python 计算 · D3 展示</span></footer>
+</body></html>
